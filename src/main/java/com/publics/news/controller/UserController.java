@@ -1,6 +1,8 @@
 package com.publics.news.controller;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.mail.MessagingException;
 import javax.validation.Valid;
@@ -78,12 +80,11 @@ public class UserController {
 	 * @param userWrapper
 	 * @return
 	 */
-	@PostMapping("/adduser")
-	public ResponseEntity<UserDataJWTWrapper> createUser(@Valid @RequestBody AddUserWrapper addUserWrapper)
+	@PostMapping("/signup")
+	public ResponseEntity<Map<String, Object>> createUser(@Valid @RequestBody AddUserWrapper addUserWrapper)
 			throws MessagingException {
-
-		UserDataJWTWrapper createUserWrapper = userService.createUser(addUserWrapper);
-		return new ResponseEntity<>(createUserWrapper, HttpStatus.CREATED);
+		Map<String, Object> hm = userService.createUser(addUserWrapper);
+		return new ResponseEntity<>(hm, HttpStatus.CREATED);
 	}
 
 	/**
@@ -120,9 +121,10 @@ public class UserController {
 	 * @return
 	 */
 	@PostMapping("/login")
-	public ResponseEntity<Object> login(@RequestParam("password") String pass, @RequestParam("email") String email) {
-
-		return new ResponseEntity<>(userService.login(pass, email), HttpStatus.OK);
+	public ResponseEntity<Map<String, Object>> login(@RequestParam("password") String pass,
+			@RequestParam("email") String email) {
+		Map<String, Object> hm = userService.login(pass, email);
+		return new ResponseEntity<>(hm, HttpStatus.OK);
 	}
 
 	/**

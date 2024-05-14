@@ -23,12 +23,14 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.publics.news.exceptions.InvalidException;
+import com.publics.news.models.HardwareItem;
 import com.publics.news.models.ProductDataWrapper;
 import com.publics.news.models.User;
 import com.publics.news.repositories.UserRepository;
@@ -80,10 +82,13 @@ public class UserService {
 	 * @param userWrapper
 	 * @return
 	 */
-	public UserDataJWTWrapper createUser(AddUserWrapper addUserWrapper) throws MessagingException {
+	public Map<String, Object> createUser(AddUserWrapper addUserWrapper) throws MessagingException {
 
+		Map<String, Object> hm = new HashMap<String, Object>();
 		if (userRepository.existsByEmail(addUserWrapper.getEmail())) {
-			throw new InvalidException(Messages.EMAIL_IS_ALREADY_EXIST);
+			hm.put("success", false);
+			hm.put("message", "Email Already Exist!");
+			return hm;
 		}
 		User user = new User();
 		BeanUtils.copyProperties(addUserWrapper, user);
@@ -101,7 +106,9 @@ public class UserService {
 		user = userRepository.save(user);
 		UserDataJWTWrapper userDataJWTWrapper = new UserDataJWTWrapper();
 		BeanUtils.copyProperties(user, userDataJWTWrapper);
-		return userDataJWTWrapper;
+		hm.put("success", true);
+		hm.put("userData", userDataJWTWrapper);
+		return hm;
 	}
 
 	/**
@@ -170,11 +177,15 @@ public class UserService {
 	 * 
 	 * @param userWrapper
 	 */
-	public User login(String pass, String email) {
+	public Map<String, Object> login(String pass, String email) {
 
+		Map<String, Object> hm = new HashMap<>();
 		User user = userRepository.findByEmail(email);
-		if (user == null)
-			throw new InvalidException(Messages.USER_NOT_FOUND_WITH_THIS_EMAIL);
+		if (user == null) {
+			hm.put("success", false);
+			hm.put("message", "User doesn't exist with this email");
+			return hm;
+		}
 
 		String generatedPassword = EncryptPassword(pass, user.getSalt());
 		if ((user.getEmail()).equals(email) && (user.getPassword()).equals(generatedPassword)) {
@@ -182,10 +193,15 @@ public class UserService {
 					Utils.getJwtToken(user, customUserDetailsService, jwtTokenProvider, bCryptPasswordEncoder));
 		}
 
-		else
-			throw new InvalidException(Messages.PASSWORD_IS_WRONG);
+		else {
+			hm.put("success", false);
+			hm.put("message", "Password is wrong");
+			return hm;
+		}
 
-		return user;
+		hm.put("success", true);
+		hm.put("userData", user);
+		return hm;
 
 	}
 
@@ -387,8 +403,6 @@ public class UserService {
 				product.setFinish("New Finish");
 				product.setRemarks("Remarcks for..");
 				product.setType("NONSS");
-				product.setSide("Starter");
-//				product.setCount(1);
 				products.add(product);
 				count++;
 			}
@@ -405,9 +419,7 @@ public class UserService {
 				product.setArea(221.21);
 				product.setFinish("New Finish");
 				product.setRemarks("Remarcks for..");
-				product.setType("SS");
-				product.setSide("Starter");
-//				product.setCount(1);
+				product.setType("NONSS");
 				products.add(product);
 				count++;
 			}
@@ -425,8 +437,6 @@ public class UserService {
 				product.setFinish("New Finish");
 				product.setRemarks("Remarcks for..");
 				product.setType("NONSS");
-				product.setSide("Mid");
-//				product.setCount(1);
 				products.add(product);
 				count++;
 			}
@@ -442,9 +452,7 @@ public class UserService {
 				product.setArea(221.21);
 				product.setFinish("New Finish");
 				product.setRemarks("Remarcks for..");
-				product.setType("NONSS");
-				product.setSide("End");
-//				product.setCount(1);
+				product.setType("SS");
 				products.add(product);
 				count++;
 			}
@@ -461,27 +469,30 @@ public class UserService {
 				product.setFinish("New Finish");
 				product.setRemarks("Remarcks for..");
 				product.setType("SS");
-				product.setSide("End");
-//				product.setCount(1);
 				products.add(product);
 				count++;
 			}
 
-			for(ProductDataWrapper item : products) {
-				System.out.println(item.getSide() + " " + item.getType());
+			List<HardwareItem> list = new ArrayList<>();
+			for (int i = 0; i < 6; i++) {
+				HardwareItem item = new HardwareItem();
+				item.setItem("Hardware Item Name");
+				item.setQty(i + 6);
+				list.add(item);
 			}
-		
-			
+
 			Map<String, Object> parameters = new HashMap<>();
+
 			System.out.println(products);
 			JasperReport jasperReport = JasperCompileManager.compileReport(getReportFile("Order_BreakDown.jrxml"));
 			JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(products);
-
+			JRBeanCollectionDataSource dataList = new JRBeanCollectionDataSource(list);
+			parameters.put("list", dataList);
 			JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, dataSource);
 			File file = new File("C:\\Users\\sachint\\Desktop\\temp-file\\New_File.xlsx");
 
 			SimpleXlsxReportConfiguration configuration = new SimpleXlsxReportConfiguration();
-			configuration.setSheetNames(new String[] { "750 LEFT", "750 MID", "750 RIGHT" });
+			configuration.setSheetNames(new String[] { "Area & Weight MS" });
 
 			FileOutputStream outputStream = new FileOutputStream(file);
 			JRXlsxExporter exporter = new JRXlsxExporter();

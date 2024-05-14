@@ -25,7 +25,7 @@ public class SecurityConfig {
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http.csrf().disable().authorizeHttpRequests()
 				.antMatchers("/swagger-ui.html",
-						"/api/users/adduser", 
+						"/api/users/signup", 
 						"/api/users/login",
 						"/api/users/forgotpassword",
 						"/api/users/otpverification",
