@@ -211,12 +211,16 @@ public class UserService {
 	 * @param userWrapper
 	 * @return
 	 */
-	public void forgetPassword(String email) throws MessagingException {
+	public Map<String, Object> forgetPassword(String email) throws MessagingException {
 
+		Map<String, Object> hm = new HashMap<>();
 		User user = userRepository.findByEmail(email);
 
-		if (user == null)
-			throw new InvalidException(Messages.USER_NOT_FOUND_WITH_EMAIL + email);
+		if (user == null) {
+			hm.put("success", false);
+			hm.put("message", "User does not exist with this email");
+			return hm;
+		}
 
 		String otp = Utils.generateOtp();
 
@@ -241,6 +245,10 @@ public class UserService {
 
 		user.setOtp(otp);
 		user = userRepository.save(user);
+
+		hm.put("success", true);
+		hm.put("message", "OTP sent successfully");
+		return hm;
 	}
 
 	/**

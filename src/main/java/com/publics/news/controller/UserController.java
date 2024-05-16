@@ -1,6 +1,5 @@
 package com.publics.news.controller;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -20,7 +19,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.publics.news.exceptions.InvalidException;
-import com.publics.news.models.Student;
 import com.publics.news.models.User;
 import com.publics.news.repositories.StudentRepo;
 import com.publics.news.service.UserService;
@@ -29,7 +27,6 @@ import com.publics.news.util.Utils;
 import com.publics.news.wrapper.AddUserWrapper;
 import com.publics.news.wrapper.PagingWrapper;
 import com.publics.news.wrapper.UpdateUserWrapper;
-import com.publics.news.wrapper.UserDataJWTWrapper;
 import com.publics.news.wrapper.UserDataWrapper;
 
 @RestController
@@ -134,9 +131,9 @@ public class UserController {
 	 * @return
 	 */
 	@PostMapping("/forgotpassword")
-	public ResponseEntity<Object> forgetPassword(@RequestParam String email) throws MessagingException {
-		userService.forgetPassword(email);
-		return new ResponseEntity<>(Messages.OTP_SENT_SUCCESSFULLY, HttpStatus.OK);
+	public ResponseEntity<Map<String, Object>> forgetPassword(@RequestParam String email) throws MessagingException {
+		Map<String, Object> hm = userService.forgetPassword(email);
+		return new ResponseEntity<>(hm, HttpStatus.OK);
 	}
 
 	/**
