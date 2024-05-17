@@ -241,7 +241,7 @@ public class UserService {
 				+ otp + "</p>" + "<h2>Thanks & Regards!</h2>" + "</div>" + "</div>" + "</body>" + "</html>";
 
 		helper.setText(emailContent, true);
-		emailSender.send(message);
+//		emailSender.send(message);
 
 		user.setOtp(otp);
 		user = userRepository.save(user);
@@ -280,17 +280,26 @@ public class UserService {
 	 * @param otpVeriWrapper
 	 * @return
 	 */
-	public void otpverification(String email, String otp) {
+	public Map<String, Object> otpverification(String email, String otp) {
+
+		Map<String, Object> hm = new HashMap<>();
 		User user = userRepository.findByEmail(email);
 
-		if (user == null)
-			throw new InvalidException(Messages.USER_NOT_FOUND_WITH_EMAIL + email);
+		if (user == null) {
+			hm.put("success", false);
+			hm.put("message", "User not found with this email");
+		}
 
 		if ((otp.equals(user.getOtp()) && email.equals(user.getEmail()))) {
 			user.setUserverified(true);
 			userRepository.save(user);
-		} else
-			throw new InvalidException(Messages.OTP_DOESNT_VERIFIED);
+			hm.put("success", true);
+			hm.put("message", "Otp verified successfully");
+		} else {
+			hm.put("success", false);
+			hm.put("message", "Otp is not valid");
+		}
+		return hm;
 	}
 
 	/**
@@ -299,11 +308,16 @@ public class UserService {
 	 * @param newpass
 	 * @param email
 	 */
-	public void changePassOtp(String newpass, String email) {
+	public Map<String, Object> changePassOtp(String newpass, String email) {
+
+		Map<String, Object> hm = new HashMap<>();
 		User user = userRepository.findByEmail(email);
 
-		if (user == null)
-			throw new InvalidException(Messages.USER_NOT_FOUND_WITH_EMAIL + email);
+		if (user == null) {
+			hm.put("success", false);
+			hm.put("message", "User not found with this email");
+			return hm;
+		}
 
 		if (user.isUserverified()) {
 			String[] str = new String[2];
@@ -312,10 +326,14 @@ public class UserService {
 			user.setSalt(str[0]);
 			user.setUserverified(false);
 			userRepository.save(user);
+			hm.put("success", true);
+			hm.put("message", "Passworde changed successfully");
 
 		} else {
-			throw new InvalidException(Messages.VERIFY_YOUR_OTP);
+			hm.put("success", false);
+			hm.put("message", "Email is not verified");
 		}
+		return hm;
 	}
 
 	/**

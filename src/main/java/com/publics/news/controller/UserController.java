@@ -155,9 +155,9 @@ public class UserController {
 	 * @return
 	 */
 	@PostMapping("/otpverification")
-	public ResponseEntity<Object> otpverification(@RequestParam String email, @RequestParam String otp) {
-		userService.otpverification(email, otp);
-		return new ResponseEntity<>(Messages.OTP_VERIFIED_SUCCESSFULLY, HttpStatus.OK);
+	public ResponseEntity<Map<String, Object>> otpverification(@RequestParam String email, @RequestParam String otp) {
+		Map<String, Object> hm =  userService.otpverification(email, otp);
+		return new ResponseEntity<>(hm, HttpStatus.OK);
 
 	}
 
@@ -169,9 +169,9 @@ public class UserController {
 	 * @return
 	 */
 	@PostMapping("/changepassotp")
-	public ResponseEntity<Object> changepassotp(@RequestParam String newpass, @RequestParam String email) {
-		userService.changePassOtp(newpass, email);
-		return new ResponseEntity<>(Messages.PASSWORD_CHANGED_SUCCESSFULLY, HttpStatus.OK);
+	public ResponseEntity<Map<String, Object>> changepassotp(@RequestParam String newpass, @RequestParam String email) {
+		Map<String, Object> hm = userService.changePassOtp(newpass, email);
+		return new ResponseEntity<>(hm, HttpStatus.OK);
 	}
 
 	/**
